@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { ReactNode } from 'react';
 import { View, StyleSheet, type ViewStyle } from "react-native";
 import { colors, spacing, radius, shadows } from "../theme/tokens";
 
