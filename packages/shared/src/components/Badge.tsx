@@ -8,12 +8,11 @@ type BadgeProps = {
   tone?: Tone;
 };
 
-// Pastille de statut. Couples bg/fg sémantiques des tokens.
-// Idéal pour les statuts de commande (pending, completed, cancelled…).
+// Pastille de statut : fond pâle + bordure + texte, assortis au ton.
 export function Badge({ label, tone = "neutral" }: BadgeProps) {
   const palette = tonePalette(tone);
   return (
-    <View style={[styles.base, { backgroundColor: palette.bg }]}>
+    <View style={[styles.base, { backgroundColor: palette.bg, borderColor: palette.fg }]}>
       <Text style={[styles.text, { color: palette.fg }]}>{label}</Text>
     </View>
   );
@@ -35,6 +34,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
+    borderWidth: 1,
   },
   text: {
     fontSize: typography.fontSize.xs,

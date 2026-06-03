@@ -27,7 +27,7 @@ export function Text({
     : null;
 
   return (
-    <RNText style={[variantStyle, { color: toneColor }, weightStyle, style]} {...rest}>
+    <RNText style={[{ fontFamily: typography.fontFamily.base }, variantStyle, { color: toneColor }, weightStyle, style]} {...rest}>
       {children}
     </RNText>
   );
