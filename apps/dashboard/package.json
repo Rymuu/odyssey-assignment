@@ -4,6 +4,7 @@
   "main": "expo-router/entry",
   "dependencies": {
     "@odyssey/api-client": "workspace:*",
+    "@odyssey/shared": "workspace:*",
     "@tanstack/react-query": "^5.100.14",
     "expo": "~56.0.8",
     "expo-constants": "^56.0.16",
