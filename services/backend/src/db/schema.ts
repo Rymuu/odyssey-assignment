@@ -46,6 +46,7 @@ export const menuItems = pgTable("menu_items", {
     .references(() => menuCategories.id, { onDelete: "restrict" }),
   name: text("name").notNull(),
   description: text("description"),
+  imageUrl: text("image_url"), 
   // PRIX EN CENTIMES (integer) — jamais en flottant, pour éviter
   // les erreurs d'arrondi monétaires. 12,50 € => 1250.
   priceCents: integer("price_cents").notNull(),

@@ -48,15 +48,15 @@ async function seed() {
   const insertedItems = await db
     .insert(menuItems)
     .values([
-      { categoryId: entrees.id, name: "Salade César", description: "Salade, poulet, parmesan, croûtons", priceCents: 950, available: true },
-      { categoryId: entrees.id, name: "Soupe à l'oignon", description: "Gratinée au fromage", priceCents: 800, available: true },
-      { categoryId: plats.id, name: "Burger maison", description: "Bœuf, cheddar, frites", priceCents: 1650, available: true },
-      { categoryId: plats.id, name: "Pizza Margherita", description: "Tomate, mozzarella, basilic", priceCents: 1200, available: true },
-      { categoryId: plats.id, name: "Risotto aux champignons", description: "Champignons de saison", priceCents: 1400, available: false },
-      { categoryId: desserts.id, name: "Tiramisu", description: "Recette maison", priceCents: 700, available: true },
-      { categoryId: desserts.id, name: "Fondant au chocolat", description: "Cœur coulant", priceCents: 750, available: true },
-      { categoryId: boissons.id, name: "Coca-Cola", priceCents: 350, available: true },
-      { categoryId: boissons.id, name: "Eau minérale", priceCents: 250, available: true },
+      { categoryId: entrees.id, name: "Salade César", description: "Salade, poulet, parmesan, croûtons", priceCents: 950, available: true, imageUrl: "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=400" },
+      { categoryId: entrees.id, name: "Soupe à l'oignon", description: "Gratinée au fromage", priceCents: 800, available: true, imageUrl: "https://images.unsplash.com/photo-1547592180-85f173990554?w=400" },
+      { categoryId: plats.id, name: "Burger maison", description: "Bœuf, cheddar, frites", priceCents: 1650, available: true, imageUrl: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400" },
+      { categoryId: plats.id, name: "Pizza Margherita", description: "Tomate, mozzarella, basilic", priceCents: 1200, available: true, imageUrl: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400" },
+      { categoryId: plats.id, name: "Risotto aux champignons", description: "Champignons de saison", priceCents: 1400, available: false, imageUrl: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400" },
+      { categoryId: desserts.id, name: "Tiramisu", description: "Recette maison", priceCents: 700, available: true, imageUrl: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400" },
+      { categoryId: desserts.id, name: "Fondant au chocolat", description: "Cœur coulant", priceCents: 750, available: true, imageUrl: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400" },
+      { categoryId: boissons.id, name: "Coca-Cola", priceCents: 350, available: true, imageUrl: "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400" },
+      { categoryId: boissons.id, name: "Eau minérale", priceCents: 250, available: true, imageUrl: "https://images.unsplash.com/photo-1560023907-5f339617ea30?w=400" },
     ])
     .returning();
 
