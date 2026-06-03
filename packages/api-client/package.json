@@ -1,0 +1,19 @@
+{
+  "name": "@odyssey/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "gen": "orval --config orval.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.0.0"
+  },
+  "devDependencies": {
+    "orval": "^8.15.0",
+    "typescript": "^5.9.3"
+  }
+}

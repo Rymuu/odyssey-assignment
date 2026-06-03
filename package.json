@@ -2,9 +2,9 @@
   "name": "odyssey-assignment",
   "private": true,
   "scripts": {
-    "dev:dashboard": "turbo run dev --filter=dashboard",
-    "dev:backend": "turbo run dev --filter=backend",
-    "gen:contract": "turbo run gen:contract",
+    "dev:dashboard": "turbo run dev --filter=@odyssey/dashboard",
+    "dev:backend": "turbo run dev --filter=@odyssey/backend",
+    "gen:contract": "pnpm --filter @odyssey/backend export:openapi && pnpm --filter @odyssey/api-client gen",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test"
@@ -12,5 +12,5 @@
   "devDependencies": {
     "turbo": "latest"
   },
-  "packageManager": "pnpm@9.0.0"
+  "packageManager": "pnpm@11.5.1"
 }

@@ -2,3 +2,30 @@ packages:
   - "apps/*"
   - "services/*"
   - "packages/*"
+overrides:
+  "@tanstack/react-query": "5.100.14"
+dedupePeerDependents: true
+allowBuilds:
+  '@turbo/darwin-64': true
+  '@turbo/darwin-arm64': true
+  '@turbo/linux-64': true
+  '@turbo/linux-arm64': true
+  '@turbo/windows-arm64': true
+  esbuild: false
+  msgpackr-extract: true
+  sharp: false
+  workerd: false
+minimumReleaseAgeExclude:
+  - '@orval/angular@8.15.0'
+  - '@orval/axios@8.15.0'
+  - '@orval/core@8.15.0'
+  - '@orval/effect@8.15.0'
+  - '@orval/fetch@8.15.0'
+  - '@orval/hono@8.15.0'
+  - '@orval/mcp@8.15.0'
+  - '@orval/mock@8.15.0'
+  - '@orval/query@8.15.0'
+  - '@orval/solid-start@8.15.0'
+  - '@orval/swr@8.15.0'
+  - '@orval/zod@8.15.0'
+  - orval@8.15.0
