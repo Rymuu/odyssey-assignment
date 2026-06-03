@@ -8,3 +8,4 @@ export * from "./components/Select";
 export * from "./components/Modal";
 export * from "./components/Skeleton";
 export * from "./components/Toast";
+export * from "./components/Table";

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { View, Pressable, Modal, FlatList, StyleSheet } from "react-native";
-import { colors, spacing, radius } from "../theme/tokens";
+import { View, Pressable, Modal, StyleSheet } from "react-native";
+import { colors, spacing, radius, shadows } from "../theme/tokens";
 import { Text } from "./Text";
 
 export type SelectOption = { label: string; value: string };
@@ -14,8 +14,8 @@ type SelectProps = {
   disabled?: boolean;
 };
 
-// Dropdown simple : un déclencheur + une liste d'options en overlay.
-// (RN n'a pas de <select> natif, on le construit avec Modal + FlatList.)
+// Select : déclencheur de largeur normale + menu en overlay centré.
+// Le placeholder sert de titre non sélectionnable en tête de menu.
 export function Select({
   label,
   placeholder = "Sélectionner…",
@@ -25,6 +25,8 @@ export function Select({
   disabled = false,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
+  const [hoveredTrigger, setHoveredTrigger] = useState(false);
+  const [hoveredValue, setHoveredValue] = useState<string | null>(null);
   const selected = options.find((o) => o.value === value);
 
   return (
@@ -34,36 +36,58 @@ export function Select({
           {label}
         </Text>
       ) : null}
+
       <Pressable
         onPress={() => !disabled && setOpen(true)}
-        style={[styles.trigger, disabled ? styles.disabled : null]}
+        onHoverIn={() => setHoveredTrigger(true)}
+        onHoverOut={() => setHoveredTrigger(false)}
+        style={[
+          styles.trigger,
+          { borderColor: hoveredTrigger ? colors.borderStrong : colors.border },
+          disabled ? styles.disabled : null,
+        ]}
       >
         <Text tone={selected ? "default" : "subtle"}>
           {selected ? selected.label : placeholder}
         </Text>
+        <Text tone="muted">▼</Text>
       </Pressable>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
-          <View style={styles.menu}>
-            <FlatList
-              data={options}
-              keyExtractor={(item) => item.value}
-              renderItem={({ item }) => (
+          <Pressable style={styles.menu} onPress={(e) => e.stopPropagation()}>
+            {/* Titre non sélectionnable en tête */}
+            <View style={styles.menuHeader}>
+              <Text variant="caption" tone="muted" weight="semibold">
+                {placeholder.toUpperCase()}
+              </Text>
+            </View>
+
+            {options.map((item) => {
+              const isHovered = hoveredValue === item.value;
+              const isSelected = item.value === value;
+              return (
                 <Pressable
-                  style={styles.option}
+                  key={item.value}
                   onPress={() => {
                     onChange(item.value);
                     setOpen(false);
                   }}
+                  onHoverIn={() => setHoveredValue(item.value)}
+                  onHoverOut={() => setHoveredValue(null)}
+                  style={[
+                    styles.option,
+                    isSelected ? styles.optionSelected : null,
+                    isHovered && !isSelected ? styles.optionHovered : null,
+                  ]}
                 >
-                  <Text tone={item.value === value ? "primary" : "default"}>
+                  <Text tone={isSelected ? "primary" : "default"} weight={isSelected ? "semibold" : "regular"}>
                     {item.label}
                   </Text>
                 </Pressable>
-              )}
-            />
-          </View>
+              );
+            })}
+          </Pressable>
         </Pressable>
       </Modal>
     </View>
@@ -71,11 +95,13 @@ export function Select({
 }
 
 const styles = StyleSheet.create({
-  wrapper: { width: "100%", gap: spacing.xs },
+  wrapper: { gap: spacing.xs },
   trigger: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
@@ -85,16 +111,36 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(42,37,33,0.3)",
     justifyContent: "center",
-    padding: spacing["3xl"],
+    alignItems: "center",
+    padding: spacing["2xl"],
   },
   menu: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.sm,           // marge uniforme autour de toutes les options
+    width: "100%",
+    maxWidth: 360,
+    ...shadows.lg,
+  },
+  menuHeader: {
     paddingVertical: spacing.sm,
-    maxHeight: 320,
+    paddingHorizontal: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    marginBottom: spacing.xs,
   },
   option: {
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.md,        // coins arrondis -> le hover/sélection est un bloc, pas pleine largeur brute
+    marginHorizontal: spacing.xs,   // marge latérale -> le surlignage ne touche pas les bords
+  },
+  optionHovered: {
+    backgroundColor: colors.surfaceAlt,
+  },
+  optionSelected: {
+    backgroundColor: colors.primaryLight,  // fond corail pâle sur l'option active
   },
 });
