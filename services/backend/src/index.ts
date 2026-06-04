@@ -6,6 +6,7 @@ import { menuItemsRouter } from "./routes/menu-items";
 import { ordersRouter } from "./routes/orders";
 import { customersRouter } from "./routes/customers";
 import { settingsRouter } from "./routes/settings";
+import { statsRouter } from "./routes/stats";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -29,6 +30,7 @@ app.route("/menu-items", menuItemsRouter);
 app.route("/orders", ordersRouter);
 app.route("/customers", customersRouter);
 app.route("/settings", settingsRouter);
+app.route("/stats", statsRouter);
 
 app.doc("/openapi.json", {
   openapi: "3.0.0",

@@ -5,15 +5,11 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface MenuItem {
+export interface PopularItem {
   id: string;
-  categoryId: string;
   name: string;
-  /** @nullable */
-  description: string | null;
   priceCents: number;
-  available: boolean;
   /** @nullable */
   imageUrl: string | null;
-  createdAt: string;
+  orderCount: number;
 }

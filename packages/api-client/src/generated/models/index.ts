@@ -28,6 +28,7 @@ export * from './patchMenuItemsId404';
 export * from './patchOrdersIdStatus400';
 export * from './patchOrdersIdStatus404';
 export * from './patchSettings404';
+export * from './popularItem';
 export * from './postOrders400';
 export * from './settings';
 export * from './updateMenuItem';

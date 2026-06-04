@@ -5,16 +5,20 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -212,82 +216,51 @@ export const postOrders = async (createOrder?: CreateOrder, options?: RequestIni
 
 
 
+export const getPostOrdersMutationOptions = <TError = PostOrders400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postOrders>>, TError,{data?: CreateOrder}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof postOrders>>, TError,{data?: CreateOrder}, TContext> => {
 
-export const getPostOrdersQueryKey = (createOrder?: CreateOrder,) => {
-    return [
-    'POST', `http://localhost:8787/orders`, createOrder
-    ] as const;
-    }
-
-
-export const getPostOrdersQueryOptions = <TData = Awaited<ReturnType<typeof postOrders>>, TError = PostOrders400>(createOrder?: CreateOrder, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postOrders>>, TError, TData>>, fetch?: RequestInit}
-) => {
-
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getPostOrdersQueryKey(createOrder);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof postOrders>>> = ({ signal }) => postOrders(createOrder, { signal, ...fetchOptions });
+const mutationKey = ['postOrders'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
 
 
 
 
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postOrders>>, {data?: CreateOrder}> = (props) => {
+          const {data} = props ?? {};
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof postOrders>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type PostOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof postOrders>>>
-export type PostOrdersQueryError = PostOrders400
+          return  postOrders(data,fetchOptions)
+        }
 
 
-export function usePostOrders<TData = Awaited<ReturnType<typeof postOrders>>, TError = PostOrders400>(
- createOrder: undefined |  CreateOrder, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof postOrders>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof postOrders>>,
-          TError,
-          Awaited<ReturnType<typeof postOrders>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function usePostOrders<TData = Awaited<ReturnType<typeof postOrders>>, TError = PostOrders400>(
- createOrder?: CreateOrder, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postOrders>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof postOrders>>,
-          TError,
-          Awaited<ReturnType<typeof postOrders>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function usePostOrders<TData = Awaited<ReturnType<typeof postOrders>>, TError = PostOrders400>(
- createOrder?: CreateOrder, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postOrders>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostOrdersMutationResult = NonNullable<Awaited<ReturnType<typeof postOrders>>>
+    export type PostOrdersMutationBody = CreateOrder | undefined
+    export type PostOrdersMutationError = PostOrders400
+
+    /**
  * @summary Créer une commande
  */
-
-export function usePostOrders<TData = Awaited<ReturnType<typeof postOrders>>, TError = PostOrders400>(
- createOrder?: CreateOrder, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof postOrders>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getPostOrdersQueryOptions(createOrder,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-export type getOrdersIdResponse200 = {
+export const usePostOrders = <TError = PostOrders400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postOrders>>, TError,{data?: CreateOrder}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postOrders>>,
+        TError,
+        {data?: CreateOrder},
+        TContext
+      > => {
+      return useMutation(getPostOrdersMutationOptions(options), queryClient);
+    }
+    export type getOrdersIdResponse200 = {
   data: OrderDetail
   status: 200
 }
@@ -470,84 +443,47 @@ export const patchOrdersIdStatus = async (id: string,
 
 
 
+export const getPatchOrdersIdStatusMutationOptions = <TError = PatchOrdersIdStatus400 | PatchOrdersIdStatus404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError,{id: string;data?: UpdateOrderStatus}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError,{id: string;data?: UpdateOrderStatus}, TContext> => {
 
-export const getPatchOrdersIdStatusQueryKey = (id: string,
-    updateOrderStatus?: UpdateOrderStatus,) => {
-    return [
-    'PATCH', `http://localhost:8787/orders/${id}/status`, updateOrderStatus
-    ] as const;
-    }
-
-
-export const getPatchOrdersIdStatusQueryOptions = <TData = Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError = PatchOrdersIdStatus400 | PatchOrdersIdStatus404>(id: string,
-    updateOrderStatus?: UpdateOrderStatus, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError, TData>>, fetch?: RequestInit}
-) => {
-
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getPatchOrdersIdStatusQueryKey(id,updateOrderStatus);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof patchOrdersIdStatus>>> = ({ signal }) => patchOrdersIdStatus(id,updateOrderStatus, { signal, ...fetchOptions });
+const mutationKey = ['patchOrdersIdStatus'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
 
 
 
 
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchOrdersIdStatus>>, {id: string;data?: UpdateOrderStatus}> = (props) => {
+          const {id,data} = props ?? {};
 
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type PatchOrdersIdStatusQueryResult = NonNullable<Awaited<ReturnType<typeof patchOrdersIdStatus>>>
-export type PatchOrdersIdStatusQueryError = PatchOrdersIdStatus400 | PatchOrdersIdStatus404
+          return  patchOrdersIdStatus(id,data,fetchOptions)
+        }
 
 
-export function usePatchOrdersIdStatus<TData = Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError = PatchOrdersIdStatus400 | PatchOrdersIdStatus404>(
- id: string,
-    updateOrderStatus: undefined |  UpdateOrderStatus, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof patchOrdersIdStatus>>,
-          TError,
-          Awaited<ReturnType<typeof patchOrdersIdStatus>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function usePatchOrdersIdStatus<TData = Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError = PatchOrdersIdStatus400 | PatchOrdersIdStatus404>(
- id: string,
-    updateOrderStatus?: UpdateOrderStatus, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof patchOrdersIdStatus>>,
-          TError,
-          Awaited<ReturnType<typeof patchOrdersIdStatus>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function usePatchOrdersIdStatus<TData = Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError = PatchOrdersIdStatus400 | PatchOrdersIdStatus404>(
- id: string,
-    updateOrderStatus?: UpdateOrderStatus, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchOrdersIdStatusMutationResult = NonNullable<Awaited<ReturnType<typeof patchOrdersIdStatus>>>
+    export type PatchOrdersIdStatusMutationBody = UpdateOrderStatus | undefined
+    export type PatchOrdersIdStatusMutationError = PatchOrdersIdStatus400 | PatchOrdersIdStatus404
+
+    /**
  * @summary Changer le statut d'une commande
  */
-
-export function usePatchOrdersIdStatus<TData = Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError = PatchOrdersIdStatus400 | PatchOrdersIdStatus404>(
- id: string,
-    updateOrderStatus?: UpdateOrderStatus, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getPatchOrdersIdStatusQueryOptions(id,updateOrderStatus,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
+export const usePatchOrdersIdStatus = <TError = PatchOrdersIdStatus400 | PatchOrdersIdStatus404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchOrdersIdStatus>>, TError,{id: string;data?: UpdateOrderStatus}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchOrdersIdStatus>>,
+        TError,
+        {id: string;data?: UpdateOrderStatus},
+        TContext
+      > => {
+      return useMutation(getPatchOrdersIdStatusMutationOptions(options), queryClient);
+    }

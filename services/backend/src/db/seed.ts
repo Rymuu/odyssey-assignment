@@ -20,9 +20,21 @@ if (!databaseUrl) {
 const sql = neon(databaseUrl);
 const db = drizzle(sql);
 
+// ── Helpers de génération ──
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function pick<T>(arr: readonly T[]): T {
+  return arr[randomInt(0, arr.length - 1)];
+}
+
+// Statuts pondérés : surtout completed, un peu de pending/preparing/ready, peu de cancelled
+const STATUS_POOL = [
+  "completed", "completed", "completed", "completed", "completed",
+  "preparing", "pending", "ready", "accepted", "cancelled",
+] as const;
+
 async function seed() {
-  // ── Nettoyage (ordre inverse des dépendances : enfants d'abord) ──
-  // Permet de relancer le seed sans empiler les doublons.
   console.log("Nettoyage des tables…");
   await db.delete(orderItems);
   await db.delete(orders);
@@ -31,7 +43,6 @@ async function seed() {
   await db.delete(customers);
   await db.delete(settings);
 
-  // ── Catégories ──
   console.log("Insertion des catégories…");
   const [entrees, plats, desserts, boissons] = await db
     .insert(menuCategories)
@@ -43,7 +54,6 @@ async function seed() {
     ])
     .returning();
 
-  // ── Plats (prix en centimes) ──
   console.log("Insertion des plats…");
   const insertedItems = await db
     .insert(menuItems)
@@ -60,7 +70,9 @@ async function seed() {
     ])
     .returning();
 
-  // ── Clients ──
+  // Plats disponibles seulement (pour composer les commandes)
+  const availableItems = insertedItems.filter((i) => i.available);
+
   console.log("Insertion des clients…");
   const insertedCustomers = await db
     .insert(customers)
@@ -68,30 +80,71 @@ async function seed() {
       { firstName: "Marie", lastName: "Dupont", email: "marie.dupont@example.com", phone: "0601020304" },
       { firstName: "Ahmed", lastName: "Benali", email: "ahmed.benali@example.com", phone: "0605060708" },
       { firstName: "Sophie", lastName: "Martin", email: "sophie.martin@example.com", phone: null },
+      { firstName: "Lucas", lastName: "Bernard", email: "lucas.bernard@example.com", phone: "0610111213" },
+      { firstName: "Emma", lastName: "Petit", email: "emma.petit@example.com", phone: "0614151617" },
+      { firstName: "Yanis", lastName: "Roux", email: "yanis.roux@example.com", phone: null },
+      { firstName: "Camille", lastName: "Garnier", email: "camille.garnier@example.com", phone: "0618192021" },
+      { firstName: "Noah", lastName: "Lefevre", email: "noah.lefevre@example.com", phone: "0622232425" },
     ])
     .returning();
 
-  // ── Une commande de démo (avec snapshots de prix) ──
-  console.log("Insertion d'une commande de démo…");
-  const burger = insertedItems.find((i) => i.name === "Burger maison")!;
-  const coca = insertedItems.find((i) => i.name === "Coca-Cola")!;
-  const marie = insertedCustomers[0];
+  // ── Génération des commandes réparties sur 7 jours ──
+  console.log("Génération des commandes…");
+  let orderCount = 0;
 
-  const totalCents = burger.priceCents * 1 + coca.priceCents * 2;
+  for (let dayOffset = 6; dayOffset >= 0; dayOffset--) {
+    const ordersThisDay = randomInt(2, 6);
 
-  const [demoOrder] = await db
-    .insert(orders)
-    .values([
-      { customerId: marie.id, status: "completed", totalCents },
-    ])
-    .returning();
+    for (let i = 0; i < ordersThisDay; i++) {
+      // Date dans le passé (jour + heure de service réaliste)
+      const createdAt = new Date();
+      createdAt.setDate(createdAt.getDate() - dayOffset);
+      createdAt.setHours(randomInt(11, 22), randomInt(0, 59), 0, 0);
 
-  await db.insert(orderItems).values([
-    { orderId: demoOrder.id, menuItemId: burger.id, nameSnapshot: burger.name, unitPriceCents: burger.priceCents, quantity: 1 },
-    { orderId: demoOrder.id, menuItemId: coca.id, nameSnapshot: coca.name, unitPriceCents: coca.priceCents, quantity: 2 },
-  ]);
+      // Composer la commande : 1 à 4 lignes
+      const nbLines = randomInt(1, 4);
+      const lines: { item: typeof availableItems[number]; qty: number }[] = [];
+      let totalCents = 0;
+      for (let j = 0; j < nbLines; j++) {
+        const item = pick(availableItems);
+        const qty = randomInt(1, 3);
+        lines.push({ item, qty });
+        totalCents += item.priceCents * qty;
+      }
 
-  // ── Settings (ligne unique) ──
+      const status = pick(STATUS_POOL);
+      const customer = pick(insertedCustomers);
+
+      // Insérer la commande avec createdAt forcé
+      const [order] = await db
+        .insert(orders)
+        .values([
+          {
+            customerId: customer.id,
+            status,
+            totalCents,
+            createdAt,
+            updatedAt: createdAt,
+          },
+        ])
+        .returning();
+
+      // Insérer ses lignes (avec snapshots)
+      await db.insert(orderItems).values(
+        lines.map((l) => ({
+          orderId: order.id,
+          menuItemId: l.item.id,
+          nameSnapshot: l.item.name,
+          unitPriceCents: l.item.priceCents,
+          quantity: l.qty,
+        }))
+      );
+
+      orderCount++;
+    }
+  }
+  console.log(`${orderCount} commandes insérées sur 7 jours.`);
+
   console.log("Insertion des réglages…");
   await db.insert(settings).values([
     { prepTimeMinutes: 20, autoAccept: false, acceptingOrders: true },

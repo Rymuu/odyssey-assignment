@@ -18,17 +18,24 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Paramètres", href: "/settings", icon: "settings" },
 ];
 
-function NavLink({ item, active }: { item: NavItem; active: boolean }) {
+function NavLink({
+  item,
+  active,
+  onNavigate,
+}: {
+  item: NavItem;
+  active: boolean;
+  onNavigate?: () => void;
+}) {
   const [hovered, setHovered] = useState(false);
   const bg = active ? colors.primaryLight : hovered ? colors.surfaceAlt : "transparent";
   const fg = active ? colors.primaryText : colors.text;
 
-  // IMPORTANT : <Link asChild> passe par un Slot qui refuse les styles en tableau.
-  // On aplatit donc le style avant de le passer au Pressable enfant.
+  // <Link asChild> passe par un Slot qui refuse les styles en tableau -> on aplatit.
   const pressableStyle = StyleSheet.flatten([styles.navItem, { backgroundColor: bg }]);
 
   return (
-    <Link href={item.href} asChild>
+    <Link href={item.href} asChild onPress={onNavigate}>
       <Pressable
         onHoverIn={() => setHovered(true)}
         onHoverOut={() => setHovered(false)}
@@ -43,7 +50,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
@@ -58,7 +65,7 @@ export function Sidebar() {
       <View style={styles.nav}>
         {NAV_ITEMS.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-          return <NavLink key={item.href} item={item} active={active} />;
+          return <NavLink key={item.href} item={item} active={active} onNavigate={onNavigate} />;
         })}
       </View>
 
@@ -66,6 +73,7 @@ export function Sidebar() {
         <NavLink
           item={{ label: "Design System", href: "/ui", icon: "grid" }}
           active={pathname.startsWith("/ui")}
+          onNavigate={onNavigate}
         />
       </View>
     </View>
@@ -75,6 +83,7 @@ export function Sidebar() {
 const styles = StyleSheet.create({
   sidebar: {
     width: 240,
+    height: "100%",
     backgroundColor: colors.surface,
     borderRightWidth: 1,
     borderRightColor: colors.border,

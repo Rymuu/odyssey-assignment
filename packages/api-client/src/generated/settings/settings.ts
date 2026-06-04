@@ -5,16 +5,20 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -207,78 +211,47 @@ export const patchSettings = async (updateSettings?: UpdateSettings, options?: R
 
 
 
+export const getPatchSettingsMutationOptions = <TError = PatchSettings404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchSettings>>, TError,{data?: UpdateSettings}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof patchSettings>>, TError,{data?: UpdateSettings}, TContext> => {
 
-export const getPatchSettingsQueryKey = (updateSettings?: UpdateSettings,) => {
-    return [
-    'PATCH', `http://localhost:8787/settings`, updateSettings
-    ] as const;
-    }
-
-
-export const getPatchSettingsQueryOptions = <TData = Awaited<ReturnType<typeof patchSettings>>, TError = PatchSettings404>(updateSettings?: UpdateSettings, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof patchSettings>>, TError, TData>>, fetch?: RequestInit}
-) => {
-
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getPatchSettingsQueryKey(updateSettings);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof patchSettings>>> = ({ signal }) => patchSettings(updateSettings, { signal, ...fetchOptions });
+const mutationKey = ['patchSettings'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
 
 
 
 
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchSettings>>, {data?: UpdateSettings}> = (props) => {
+          const {data} = props ?? {};
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof patchSettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type PatchSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof patchSettings>>>
-export type PatchSettingsQueryError = PatchSettings404
+          return  patchSettings(data,fetchOptions)
+        }
 
 
-export function usePatchSettings<TData = Awaited<ReturnType<typeof patchSettings>>, TError = PatchSettings404>(
- updateSettings: undefined |  UpdateSettings, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof patchSettings>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof patchSettings>>,
-          TError,
-          Awaited<ReturnType<typeof patchSettings>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function usePatchSettings<TData = Awaited<ReturnType<typeof patchSettings>>, TError = PatchSettings404>(
- updateSettings?: UpdateSettings, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof patchSettings>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof patchSettings>>,
-          TError,
-          Awaited<ReturnType<typeof patchSettings>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function usePatchSettings<TData = Awaited<ReturnType<typeof patchSettings>>, TError = PatchSettings404>(
- updateSettings?: UpdateSettings, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof patchSettings>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof patchSettings>>>
+    export type PatchSettingsMutationBody = UpdateSettings | undefined
+    export type PatchSettingsMutationError = PatchSettings404
+
+    /**
  * @summary Mettre à jour les réglages
  */
-
-export function usePatchSettings<TData = Awaited<ReturnType<typeof patchSettings>>, TError = PatchSettings404>(
- updateSettings?: UpdateSettings, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof patchSettings>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getPatchSettingsQueryOptions(updateSettings,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
+export const usePatchSettings = <TError = PatchSettings404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchSettings>>, TError,{data?: UpdateSettings}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchSettings>>,
+        TError,
+        {data?: UpdateSettings},
+        TContext
+      > => {
+      return useMutation(getPatchSettingsMutationOptions(options), queryClient);
+    }

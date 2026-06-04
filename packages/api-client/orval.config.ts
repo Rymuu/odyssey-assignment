@@ -11,12 +11,6 @@ export default defineConfig({
       httpClient: "fetch",
       baseUrl: "http://localhost:8787",
       clean: true,
-      override: {
-        query: {
-          useQuery: true,
-          useInfinite: false,
-        },
-      },
     },
   },
 });

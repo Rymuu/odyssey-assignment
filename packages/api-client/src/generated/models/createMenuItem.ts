@@ -13,4 +13,5 @@ export interface CreateMenuItem {
   /** @exclusiveMinimum 0 */
   priceCents: number;
   available?: boolean;
+  imageUrl?: string;
 }

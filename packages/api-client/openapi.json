@@ -54,6 +54,10 @@
           "available": {
             "type": "boolean"
           },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string"
           }
@@ -65,6 +69,7 @@
           "description",
           "priceCents",
           "available",
+          "imageUrl",
           "createdAt"
         ]
       },
@@ -89,6 +94,9 @@
           },
           "available": {
             "type": "boolean"
+          },
+          "imageUrl": {
+            "type": "string"
           }
         },
         "required": [
@@ -118,6 +126,9 @@
           },
           "available": {
             "type": "boolean"
+          },
+          "imageUrl": {
+            "type": "string"
           }
         }
       },
@@ -391,6 +402,35 @@
             "nullable": true
           }
         }
+      },
+      "PopularItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priceCents": {
+            "type": "integer"
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "priceCents",
+          "imageUrl",
+          "orderCount"
+        ]
       }
     },
     "parameters": {}
@@ -953,6 +993,29 @@
                   "required": [
                     "error"
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/popular-items": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Plats les plus commandés",
+        "responses": {
+          "200": {
+            "description": "Top plats par quantité commandée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PopularItem"
+                  }
                 }
               }
             }

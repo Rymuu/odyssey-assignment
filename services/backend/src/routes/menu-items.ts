@@ -12,6 +12,7 @@ const MenuItemSchema = z
     description: z.string().nullable(),
     priceCents: z.number().int(),
     available: z.boolean(),
+    imageUrl: z.string().nullable(),
     createdAt: z.string(),
   })
   .openapi("MenuItem");
@@ -23,6 +24,7 @@ const CreateMenuItemSchema = z
     description: z.string().optional(),
     priceCents: z.number().int().positive(),
     available: z.boolean().optional(),
+    imageUrl: z.string().optional(),
   })
   .openapi("CreateMenuItem");
 
@@ -150,6 +152,7 @@ function serialize(r: typeof menuItems.$inferSelect) {
     description: r.description,
     priceCents: r.priceCents,
     available: r.available,
+    imageUrl: r.imageUrl,
     createdAt: r.createdAt.toISOString(),
   };
 }
