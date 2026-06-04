@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo/vector-icons": "^15.1.1",
     "@odyssey/api-client": "workspace:*",
     "@odyssey/shared": "workspace:*",
     "@tanstack/react-query": "^5.100.14",

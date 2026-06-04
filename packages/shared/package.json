@@ -12,8 +12,9 @@
     "@types/react": "~19.2.2",
     "typescript": "~6.0.3"
   },
-  "peerDependencies": {
+"peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "@expo/vector-icons": "*"
   }
 }

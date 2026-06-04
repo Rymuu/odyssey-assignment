@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect, type ReactNode } from "react";
 import { View, StyleSheet, Animated } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { colors, spacing, radius, shadows } from "../theme/tokens";
 import { Text } from "./Text";
 
@@ -25,13 +26,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const show = useCallback(
     (title: string, options?: { description?: string; tone?: ToastTone }) => {
       const id = nextId.current++;
-      setToasts((prev) => [
-        ...prev,
-        { id, title, description: options?.description, tone: options?.tone ?? "info" },
-      ]);
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, 3500);
+      setToasts((prev) => [...prev, { id, title, description: options?.description, tone: options?.tone ?? "info" }]);
+      setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
     },
     []
   );
@@ -48,22 +44,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-const ICON: Record<ToastTone, string> = {
-  success: "✓",
-  error: "✕",
-  warning: "!",
-  info: "i",
+const ICON: Record<ToastTone, keyof typeof Feather.glyphMap> = {
+  success: "check-circle",
+  error: "x-circle",
+  warning: "alert-triangle",
+  info: "info",
 };
 
-function ToastView({
-  title,
-  description,
-  tone,
-}: {
-  title: string;
-  description?: string;
-  tone: ToastTone;
-}) {
+function ToastView({ title, description, tone }: { title: string; description?: string; tone: ToastTone }) {
   const accent = toneAccent(tone);
   const translateX = useRef(new Animated.Value(40)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -76,27 +64,15 @@ function ToastView({
   }, [translateX, opacity]);
 
   return (
-    <Animated.View
-      style={[styles.toast, { transform: [{ translateX }], opacity }]}
-    >
-      {/* barre latérale colorée, arrondie à gauche, droite à droite */}
+    <Animated.View style={[styles.toast, { transform: [{ translateX }], opacity }]}>
       <View style={[styles.accentBar, { backgroundColor: accent.fg }]} />
-      {/* contenu */}
       <View style={styles.inner}>
         <View style={[styles.iconCircle, { backgroundColor: accent.bg }]}>
-          <Text variant="label" weight="bold" style={{ color: accent.fg }}>
-            {ICON[tone]}
-          </Text>
+          <Feather name={ICON[tone]} size={15} color={accent.fg} />
         </View>
         <View style={styles.textBlock}>
-          <Text variant="label" weight="semibold">
-            {title}
-          </Text>
-          {description ? (
-            <Text variant="caption" tone="muted">
-              {description}
-            </Text>
-          ) : null}
+          <Text variant="label" weight="semibold">{title}</Text>
+          {description ? <Text variant="caption" tone="muted">{description}</Text> : null}
         </View>
       </View>
     </Animated.View>
@@ -113,13 +89,7 @@ function toneAccent(tone: ToastTone): { bg: string; fg: string } {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: spacing["2xl"],
-    right: spacing["2xl"],
-    alignItems: "flex-end",
-    gap: spacing.sm,
-  },
+  container: { position: "absolute", top: spacing["2xl"], right: spacing["2xl"], alignItems: "flex-end", gap: spacing.sm },
   toast: {
     flexDirection: "row",
     alignItems: "stretch",
@@ -127,30 +97,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     minWidth: 260,
     maxWidth: 360,
-    overflow: "hidden",       // pour que la barre suive l'arrondi du conteneur
+    overflow: "hidden",
     ...shadows.md,
   },
-  accentBar: {
-    width: 4,
-    // arrondi à gauche (suit le conteneur), droit à droite
-    borderTopLeftRadius: radius.md,
-    borderBottomLeftRadius: radius.md,
-  },
-  inner: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-  },
-  iconCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 1,
-  },
+  accentBar: { width: 4, borderTopLeftRadius: radius.md, borderBottomLeftRadius: radius.md },
+  inner: { flex: 1, flexDirection: "row", alignItems: "flex-start", gap: spacing.md, paddingVertical: spacing.md, paddingHorizontal: spacing.lg },
+  iconCircle: { width: 24, height: 24, borderRadius: radius.full, alignItems: "center", justifyContent: "center", marginTop: 1 },
   textBlock: { flex: 1, gap: 2 },
 });
