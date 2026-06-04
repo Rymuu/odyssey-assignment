@@ -1,159 +1,130 @@
-# Turborepo starter
+# Odyssey — Dashboard d'administration de restaurant
 
-This Turborepo starter is maintained by the Turborepo core team.
+Back-office permettant de visualiser et de **gérer** l'activité d'un restaurant :
+tableau de bord (KPIs, graphiques, plats populaires), commandes (liste, filtres,
+recherche, détail, changement de statut, création), clients (CRM), menu (CRUD avec
+images et disponibilité) et réglages (service, temps de préparation, horaires).
 
-## Using this example
+Monorepo **pnpm + Turborepo** : front Expo / React Native Web, API Hono sur
+Cloudflare Workers, PostgreSQL via Drizzle, et un client typé généré par Orval.
 
-Run the following command:
+> Pour les choix techniques, voir [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+> Pour les compromis assumés, voir [`TRADEOFFS.md`](./TRADEOFFS.md).
 
-```sh
-npx create-turbo@latest
+## Prérequis
+
+- **Node.js** ≥ 20
+- **pnpm** 11 (`npm install -g pnpm`)
+- Un compte **Neon** (PostgreSQL serverless, gratuit) : https://neon.tech
+
+## 1. Installation
+
+```bash
+git clone https://github.com/Rymuu/odyssey-assignment.git
+cd odyssey-assignment
+pnpm install
 ```
 
-## What's inside?
+## 2. Base de données (Neon)
 
-This Turborepo includes the following packages/apps:
+1. Créez un projet sur [Neon](https://neon.tech) et copiez la **connection string**
+   (celle du *pooler*, format `postgresql://user:password@…-pooler.…neon.tech/db?sslmode=require`).
+2. Configurez les variables d'environnement du backend en copiant les fichiers
+   d'exemple :
 
-### Apps and Packages
+   ```bash
+   cd services/backend
+   cp .env.example .env
+   cp .dev.vars.example .dev.vars
+   ```
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+3. Renseignez votre `DATABASE_URL` dans **les deux** fichiers :
+   - `.env` — utilisé par les scripts Node (migrations, seed)
+   - `.dev.vars` — utilisé par le runtime Cloudflare Workers (dev local)
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+   `.dev.vars` contient aussi `CORS_ORIGIN="http://localhost:8081"` (l'origine du
+   front en développement).
 
-### Utilities
+## 3. Schéma & données de démonstration
 
-This Turborepo has some additional tools already setup for you:
+Toujours dans `services/backend` :
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```bash
+pnpm db:generate   # génère les fichiers de migration depuis le schéma Drizzle
+pnpm db:migrate    # applique le schéma à la base Neon
+pnpm db:seed       # peuple la base (catégories, plats, clients, commandes, réglages)
 ```
 
-Without global `turbo`, use your package manager:
+> Le seed génère des commandes réparties sur les 7 derniers jours, avec des chiffres
+> aléatoires : chaque exécution produit un jeu de données légèrement différent.
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
+## 4. Lancer le projet
+
+Depuis la **racine** du monorepo, dans deux terminaux :
+
+```bash
+pnpm dev:backend     # API sur http://localhost:8787
+pnpm dev:dashboard   # front sur http://localhost:8081
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Ouvrez **http://localhost:8081** dans le navigateur.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## 5. Régénérer le client API (si le backend change)
 
-```sh
-turbo build --filter=docs
+Le client et les hooks React Query sont générés à partir de la spec OpenAPI du
+backend. Après toute modification d'une route ou du schéma :
+
+```bash
+pnpm gen:contract
 ```
 
-Without global `turbo`:
+Cette commande exporte `openapi.json` depuis le backend puis lance Orval pour
+régénérer `packages/api-client/src/generated/`.
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+## Scripts disponibles (racine)
+
+| Commande | Description |
+|---|---|
+| `pnpm dev:dashboard` | Lance le front (Expo Web) |
+| `pnpm dev:backend` | Lance l'API (Hono / Workers) |
+| `pnpm gen:contract` | Régénère le client typé (OpenAPI → Orval) |
+| `pnpm lint` | Linte le code (backend) |
+| `pnpm typecheck` | Vérifie les types sur tout le monorepo |
+| `pnpm test` | Lance tous les tests (backend + front) |
+
+## Structure du projet
+
+```
+odyssey-assignment/
+├── apps/
+│   └── dashboard/        # Front Expo + React Native Web
+│       ├── app/          # Pages (Home, Orders, CRM, Menu, Settings)
+│       ├── components/    # Composants non-routables (Sidebar)
+│       └── lib/          # Logique pure testée (panier, stats)
+├── services/
+│   └── backend/          # API Hono / Cloudflare Workers
+│       └── src/
+│           ├── db/        # Schéma Drizzle + seed
+│           ├── routes/    # Routes par domaine
+│           └── services/  # Logique métier (machine à états, création commande)
+└── packages/
+    ├── api-client/       # Client + hooks générés par Orval
+    └── shared/           # Design system, animations, hooks
 ```
 
-### Develop
+## Tests
 
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
+```bash
+pnpm test
 ```
 
-Without global `turbo`, use your package manager:
+- **Backend** : machine à états des statuts de commande, calcul du total, validation
+  des plats (`services/backend/src/services/orders.test.ts`).
+- **Front** : logique du panier et calculs de statistiques
+  (`apps/dashboard/lib/*.test.ts`).
 
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
+## Stack
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+Expo · React Native Web · Expo Router · Hono · Cloudflare Workers · Drizzle ORM ·
+drizzle-zod · OpenAPI · Orval · React Query · PostgreSQL (Neon) · Vitest ·
+pnpm · Turborepo · TypeScript.
