@@ -4,10 +4,10 @@ export const colors = {
   text: "#2A2521", textMuted: "#9A918B", textSubtle: "#C7BEB6",
   border: "#EFE9E3", borderStrong: "#E2D9D1",
   primary: "#EF8268", primaryHover: "#E06A4E", primaryLight: "#FBEDE7", primaryText: "#C2563B",
-  successBg: "#E7F3EC", successFg: "#3D8A63",
-  warningBg: "#FAF0DD", warningFg: "#A87A2E",
-  errorBg: "#FBE9E7", errorFg: "#C05A50",
-  infoBg: "#EDF1F4", infoFg: "#647585",
+  successBg: "#E3F6EA", successFg: "#3E9D6B", successBorder: "#A8E2C0",
+  warningBg: "#FCF0D9", warningFg: "#C68A2E", warningBorder: "#F2D596",
+  errorBg: "#FDE7E1", errorFg: "#D65F45", errorBorder: "#F7C2B4",
+  infoBg: "#E6EFFA", infoFg: "#5683C4", infoBorder: "#BFD5F0",
   white: "#FFFFFF",
 } as const;
 export const typography = {

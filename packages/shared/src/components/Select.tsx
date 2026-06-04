@@ -14,8 +14,6 @@ type SelectProps = {
   disabled?: boolean;
 };
 
-// Select : déclencheur de largeur normale + menu en overlay centré.
-// Le placeholder sert de titre non sélectionnable en tête de menu.
 export function Select({
   label,
   placeholder = "Sélectionner…",
@@ -32,9 +30,7 @@ export function Select({
   return (
     <View style={styles.wrapper}>
       {label ? (
-        <Text variant="label" tone="muted">
-          {label}
-        </Text>
+        <Text variant="label" tone="muted">{label}</Text>
       ) : null}
 
       <Pressable
@@ -56,34 +52,29 @@ export function Select({
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
           <Pressable style={styles.menu} onPress={(e) => e.stopPropagation()}>
-            {/* Titre non sélectionnable en tête */}
             <View style={styles.menuHeader}>
               <Text variant="caption" tone="muted" weight="semibold">
                 {placeholder.toUpperCase()}
               </Text>
             </View>
-
             {options.map((item) => {
               const isHovered = hoveredValue === item.value;
               const isSelected = item.value === value;
               return (
                 <Pressable
                   key={item.value}
-                  onPress={() => {
-                    onChange(item.value);
-                    setOpen(false);
-                  }}
+                  onPress={() => { onChange(item.value); setOpen(false); }}
                   onHoverIn={() => setHoveredValue(item.value)}
                   onHoverOut={() => setHoveredValue(null)}
                   style={[
                     styles.option,
-                    isSelected ? styles.optionSelected : null,
-                    isHovered && !isSelected ? styles.optionHovered : null,
+                    isSelected ? styles.optionSelected : isHovered ? styles.optionHovered : null,
                   ]}
                 >
                   <Text tone={isSelected ? "primary" : "default"} weight={isSelected ? "semibold" : "regular"}>
                     {item.label}
                   </Text>
+                  {isSelected ? <Text tone="primary" weight="bold">✓</Text> : null}
                 </Pressable>
               );
             })}
@@ -119,7 +110,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: spacing.sm,           // marge uniforme autour de toutes les options
+    padding: spacing.sm,
     width: "100%",
     maxWidth: 360,
     ...shadows.lg,
@@ -132,15 +123,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   option: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.md,        // coins arrondis -> le hover/sélection est un bloc, pas pleine largeur brute
-    marginHorizontal: spacing.xs,   // marge latérale -> le surlignage ne touche pas les bords
+    borderRadius: radius.md,
+    marginHorizontal: spacing.xs,
   },
-  optionHovered: {
-    backgroundColor: colors.surfaceAlt,
-  },
-  optionSelected: {
-    backgroundColor: colors.primaryLight,  // fond corail pâle sur l'option active
-  },
+  optionHovered: { backgroundColor: colors.surfaceAlt },
+  optionSelected: { backgroundColor: colors.primaryLight },
 });

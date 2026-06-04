@@ -8,23 +8,23 @@ type BadgeProps = {
   tone?: Tone;
 };
 
-// Pastille de statut : fond pâle + bordure + texte, assortis au ton.
+// Pastille de statut : fond pâle + bordure douce + texte, assortis au ton.
 export function Badge({ label, tone = "neutral" }: BadgeProps) {
   const palette = tonePalette(tone);
   return (
-    <View style={[styles.base, { backgroundColor: palette.bg, borderColor: palette.fg }]}>
+    <View style={[styles.base, { backgroundColor: palette.bg, borderColor: palette.border }]}>
       <Text style={[styles.text, { color: palette.fg }]}>{label}</Text>
     </View>
   );
 }
 
-function tonePalette(tone: Tone): { bg: string; fg: string } {
+function tonePalette(tone: Tone): { bg: string; fg: string; border: string } {
   switch (tone) {
-    case "success": return { bg: colors.successBg, fg: colors.successFg };
-    case "warning": return { bg: colors.warningBg, fg: colors.warningFg };
-    case "error":   return { bg: colors.errorBg, fg: colors.errorFg };
-    case "info":    return { bg: colors.infoBg, fg: colors.infoFg };
-    case "neutral": return { bg: colors.surfaceAlt, fg: colors.textMuted };
+    case "success": return { bg: colors.successBg, fg: colors.successFg, border: colors.successBorder };
+    case "warning": return { bg: colors.warningBg, fg: colors.warningFg, border: colors.warningBorder };
+    case "error":   return { bg: colors.errorBg, fg: colors.errorFg, border: colors.errorBorder };
+    case "info":    return { bg: colors.infoBg, fg: colors.infoFg, border: colors.infoBorder };
+    case "neutral": return { bg: colors.surfaceAlt, fg: colors.textMuted, border: colors.border };
   }
 }
 
